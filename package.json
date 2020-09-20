@@ -47,9 +47,11 @@
     "babel-plugin-module-resolver": "^4.0.0",
     "babel-plugin-transform-import-bangtext-node": "^0.1.4",
     "d3": "^6.1.1",
+    "dotenv-webpack": "^2.0.0",
     "gulp-replace": "^1.0.0",
     "mkdirp": "^0.5.1",
     "request-promise": "^4.2.5",
+    "textures": "^1.2.2",
     "uglifyjs-webpack-plugin": "^2.2.0"
   }
 }

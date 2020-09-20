@@ -1,9 +1,58 @@
 @import "fonts";
 @import "mq";
 @import "palette";
-// @import "enhancer";
+@import "enhancer";
 
 .interactive-atom {
     margin: 0;
     padding: 0;
 }
+
+
+.gv-line{
+	fill:none;
+	stroke:#333;
+
+}//mq(mobileLandscape)
+
+#interactive-slot-1,#interactive-slot-2,#interactive-slot-3,#interactive-slot-4,#interactive-slot-5,#interactive-slot-6{
+	max-width: 860px;
+}
+
+.Oceania{fill:$neutral-100;}
+.Africa{fill:$neutral-96;}
+.Europe{fill:$neutral-92;}
+.Asia{fill:$neutral-86;}
+.South-America{fill:$neutral-46;}
+.North-America{fill:$neutral-7;}
+
+.country-fill{
+	fill-opacity: 0;
+	fill: white;
+}
+
+.continent-stroke{
+	pointer-events: none;
+	fill: none;
+	stroke: #333333;
+	stroke-width: 2px;
+}
+
+
+.red-line{
+	width: 100%;
+	position: absolute;
+	top:calc(50% - 200px);
+	border: 1px solid red;
+	position: fixed;
+}
+
+.red-line-2{
+	width: 100%;
+	position: absolute;
+	top:calc(50% + 200px);
+	border: 1px solid green;
+	position: fixed;
+}
+
+

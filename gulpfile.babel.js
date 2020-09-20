@@ -22,6 +22,7 @@ const cdnUrl = 'https://interactive.guim.co.uk';
 const webpack = require('webpack')
 const ws = require('webpack-stream')
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin')
 const mkdirp = require("mkdirp")
 const rp = require("request-promise")
 
@@ -37,7 +38,7 @@ const assetPath = isDeploy ? `${cdnUrl}/${s3Path}/assets/${version}` : '../asset
 const babelrc = JSON.parse(fs.readFileSync('.babelrc'));
 const presets = (babelrc.presets || []).concat(babelrc.env.client.presets);
 const plugins = (babelrc.plugins || []).concat(babelrc.env.client.plugins);
-
+const Dotenv = require('dotenv-webpack');
 
 let webpackPlugins = [
   new webpack.LoaderOptionsPlugin({
@@ -47,7 +48,8 @@ let webpackPlugins = [
               plugins
           }
       }
-  })
+  }),
+  new Dotenv()
 ];
 
 const clean = () => {
@@ -80,6 +82,9 @@ const buildJS = () => {
       .pipe(named((file) => file.relative.replace(/.js/g, "")))
       .pipe(ws({
         watch: false,
+        node: {
+          fs: 'empty'
+        },
         mode: isDeploy ? 'production' : 'development',
         module: {
             rules: [
@@ -104,7 +109,7 @@ const buildJS = () => {
             ]
         },
         devtool: 'source-map',
-        optimization : { minimizer: [new UglifyJsPlugin()] },
+        optimization : { minimizer: [new TerserPlugin()] },
         plugins: webpackPlugins,
         resolve: {
           alias: {
