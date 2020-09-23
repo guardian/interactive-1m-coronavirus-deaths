@@ -19,7 +19,7 @@
   &::before {
     content: "";
     display: block;
-    background-image: url("<%= path %>/images/covid_spread_world.gif");
+    background-image: url("<%= path %>/images/covid_global_spread_mobile_header.gif");
     background-repeat: no-repeat;
     background-size: 95%;
     background-position: 50% 30%;
@@ -46,7 +46,7 @@
       padding-bottom: 120px;
       height: 448px;
       height: 600px;
-      background-image: url("<%= path %>/images/covid_spread_world.gif");
+      background-image: url("<%= path %>/images/covid_global_spread_desktop_header.gif");
     }
 
     @include mq(desktop) {
@@ -58,7 +58,7 @@
       height: 448px;
       height: 650px;
       transform: translateX(0);
-      background-image: url("<%= path %>/images/covid_spread_world.gif");
+      background-image: url("<%= path %>/images/covid_global_spread_desktop_header.gif");
     }
     @include mq(leftCol) {
       background-size: 85%;
