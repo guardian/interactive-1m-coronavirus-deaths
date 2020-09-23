@@ -33,6 +33,14 @@
 	stroke-opacity:0;
 }
 
+.fill-over{
+	stroke: #FFF;
+	stroke-width: 1px;
+	fill-opacity: 0.5;
+	stroke-opacity:0.5;
+	
+}
+
 .continent-fill{
 	pointer-events: none;
 	///fill: none;
@@ -83,6 +91,8 @@
 	margin: 0 6px 0 0;
 	white-space: nowrap;
 }
+
+
 
 .x.axis, .y.axis{
 
@@ -144,11 +154,7 @@
 	    line-height: 16px;
 	    text-align: left;
 	    fill: #333;
-	    font-style: normal;
-		
-			
-		
-		
+	    font-style: normal;	
 }
 
 .tooltip-border{

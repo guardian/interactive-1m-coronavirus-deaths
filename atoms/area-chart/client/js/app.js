@@ -11,7 +11,9 @@ let data = [];
 
 let dataContinents = [];
 
-let dataCountries = [];
+const dataCountries = [];
+
+let dictionary = [];
 
 let keyDates = [];
 
@@ -112,6 +114,9 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1YyNb9oLJOIgIUZcu-FpvCnlua
 
 		dataCountries.push(objCountry)
 
+		//dataContinentsByDate[date] = objCountry;
+
+
 		dataContinents.push({date:date})
 
 		continents.map(continent => {
@@ -127,6 +132,8 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1YyNb9oLJOIgIUZcu-FpvCnlua
 		})
 
 	})
+
+	dictionary = toDict(dataCountries)
 
 	rawData.map(entry => getContinent[entry['Country/Region']] = entry.Continent);
 
@@ -145,6 +152,13 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1YyNb9oLJOIgIUZcu-FpvCnlua
 
 
 })
+
+const toDict = (arr) => {
+	const out = {}
+	arr.forEach(o => out[o["date"]] = o)
+
+	return out
+}
 
 const makeSlot = (id, date, deaths) => {
 
@@ -294,6 +308,14 @@ const makeCountryChart = (svg, data) => {
 
 	if(data)
 	{
+		let tt;
+		let key;
+		let id;
+		let enviroment;
+		let date;
+		let countryData;
+		let bRect;
+
 		let countries = svg.append('g')
 		.selectAll('path')
 		.data(data)
@@ -303,27 +325,38 @@ const makeCountryChart = (svg, data) => {
 		.attr("d", d => area(d, true))
 		.on("mouseover", (event, d) => {
 
-			d3.selectAll('#' + event.target.parentNode.parentNode.parentNode.id + ' .tooltip')
+			console.log('improved')
+
+			id = event.target.parentNode.parentNode.parentNode.id;
+
+			enviroment = +id.split('interactive-slot-')[1] -1;
+
+			tt = d3.selectAll('#' + id + ' .tooltip')
+
+			key = svg.select('.' + d.key.replace(/\s/g, '-'));
+
+			date = keyDates[enviroment].date;
+
+			countryData = dictionary[date]
+
+			tt
 			.classed('over', true)
 
-			svg.select('.' + d.key.replace(/\s/g, '-')).style('fill-opacity', .3)
-			svg.select('.' + d.key.replace(/\s/g, '-')).style('stroke-opacity', .3)
+			key
+			.classed('fill-over', true)
 
-			let enviroment = +event.target.parentNode.parentNode.parentNode.id.split('interactive-slot-')[1] -1;
-
-			let date = keyDates[enviroment].date
-
-			let countryData = dataCountries.find( f => f.date === date)
-
-			d3.selectAll('#' + event.target.parentNode.parentNode.parentNode.id + ' .tooltip')
+			tt
 			.html(  d.key + '<br>' + numberWithCommas(countryData[d.key]))
+
+			bRect = d3.select('#' + event.target.parentNode.parentNode.parentNode.id + ' .tooltip').node().getBoundingClientRect()
 
 		})
 		.on("mouseout", event => {
-			svg.selectAll('.country-fill').style('fill-opacity', 0)
-			svg.selectAll('.country-fill').style('stroke-opacity', 0)
 
-			d3.selectAll('#' + event.target.parentNode.parentNode.parentNode.id + ' .tooltip')
+			key
+			.classed('fill-over', false)
+
+			tt
 			.classed('over', false)
 		})
 		.on("mousemove", (event, d) => {
@@ -332,16 +365,14 @@ const makeCountryChart = (svg, data) => {
 
 		    let left = here[0];
 		    let top = here[1];
-		    let tWidth = d3.select('#' + event.target.parentNode.parentNode.parentNode.id + ' .tooltip').node().getBoundingClientRect().width;
-		    let tHeight = d3.select('#' + event.target.parentNode.parentNode.parentNode.id + ' .tooltip').node().getBoundingClientRect().height;
+		    let tWidth = bRect.width;
+		    let tHeight = bRect.height;
 
 		    let posX = left - tWidth - 6;
 		    let posY = top - tHeight - 6;
 
-		    if(posX + tWidth > width)posX = width - tWidth - 2
-
-		    d3.selectAll('#' + event.target.parentNode.parentNode.parentNode.id + ' .tooltip').style('left',  posX + 'px')
-		    d3.selectAll('#' + event.target.parentNode.parentNode.parentNode.id + ' .tooltip').style('top', posY + 'px')
+		    tt.style('left',  posX + 'px')
+		    tt.style('top', posY + 'px')
 
 		})
 	}
