@@ -47,10 +47,16 @@
     "babel-plugin-module-resolver": "^4.0.0",
     "babel-plugin-transform-import-bangtext-node": "^0.1.4",
     "d3": "^6.1.1",
+    "d3-collection": "^1.0.7",
+    "d3-voronoi-map": "^2.0.1",
+    "d3-voronoi-treemap": "^1.1.0",
+    "d3-weighted-voronoi": "^1.0.1",
     "dotenv-webpack": "^2.0.0",
+    "gsap": "^3.5.1",
     "gulp-replace": "^1.0.0",
     "mkdirp": "^0.5.1",
     "request-promise": "^4.2.5",
+    "seedrandom": "^2.4.4",
     "textures": "^1.2.2",
     "uglifyjs-webpack-plugin": "^2.2.0"
   }

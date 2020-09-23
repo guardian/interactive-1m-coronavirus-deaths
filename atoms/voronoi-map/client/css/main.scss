@@ -1,0 +1,35 @@
+@import "fonts";
+@import "mq";
+@import "palette";
+@import "enhancer";
+
+.interactive-atom {
+	margin: 0;
+	padding: 0;
+}
+
+
+.Europe, .North.America, .South.America, [class="Africa"], .Asia, .Oceania
+{
+	fill-opacity:0;
+	pointer-events: none;
+	stroke-width:5px;
+}
+
+.North.America
+{
+	fill-opacity:0;
+	pointer-events: none;
+	stroke-width:5px;
+}
+
+.highlighter{
+	stroke:white;
+}
+
+
+.data-nested{
+	fill-opacity:0;
+	pointer-events: none;
+}
+

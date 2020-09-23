@@ -4,8 +4,8 @@
 @import "enhancer";
 
 .interactive-atom {
-    margin: 0;
-    padding: 0;
+	margin: 0;
+	padding: 0;
 }
 
 
@@ -13,46 +13,191 @@
 	fill:none;
 	stroke:#333;
 
-}//mq(mobileLandscape)
+}
 
 #interactive-slot-1,#interactive-slot-2,#interactive-slot-3,#interactive-slot-4,#interactive-slot-5,#interactive-slot-6{
 	max-width: 860px;
 }
 
-.Oceania{fill:$neutral-100;}
-.Africa{fill:$neutral-96;}
-.Europe{fill:$neutral-92;}
-.Asia{fill:$neutral-86;}
-.South-America{fill:$neutral-46;}
-.North-America{fill:$neutral-7;}
+.Oceania{fill:#c70000;}
+.Africa{fill:#EFEFEF;}
+.Europe{fill:#E6F5FF;}
+.Asia{fill:#00B2FF;}
+.South-America{fill:#056DA1;}
+.North-America{fill:#951D7A;}
 
 .country-fill{
 	fill-opacity: 0;
 	fill: white;
+	stroke:#333;
+	stroke-opacity:0;
 }
 
-.continent-stroke{
+.continent-fill{
 	pointer-events: none;
-	fill: none;
+	///fill: none;
 	stroke: #333333;
 	stroke-width: 2px;
 }
 
-
-.red-line{
-	width: 100%;
-	position: absolute;
-	top:calc(50% - 200px);
-	border: 1px solid red;
-	position: fixed;
+.gv-1m-deaths-counter{
+	margin-bottom: 12px;
+	margin-top: 20px;
 }
 
-.red-line-2{
-	width: 100%;
-	position: absolute;
-	top:calc(50% + 200px);
-	border: 1px solid green;
-	position: fixed;
+.deaths-wrapper{
+	display: flex;
+	flex-direction: row;
+
+	span{
+		@include fs-titlepiece(1);
+		align-self: end;
+		color: #333;
+		font-size: 16px;
+		height: 36px;
+	}
 }
+
+.counter-date{
+	font-family: "Guardian Headline","Guardian Egyptian Web","Guardian Headline Full",Georgia,serif;
+	font-style: italic;
+	font-weight: lighter;
+	margin-bottom: 12px;
+	line-height: 1.2;
+	font-size: 22px;
+	margin: 0;
+}
+
+.counter-deaths{
+	@include fs-titlepiece(1);
+	line-height: 44px;
+	font-weight: bold;
+	font-variant-numeric: lining-nums;
+	-moz-font-feature-settings: "lnum";
+	-webkit-font-feature-settings: "lnum";
+	font-feature-settings: "lnum";
+	font-size: 36px;
+	margin-left: 4px;
+	margin-bottom: 0px;
+	color: #333;
+	margin: 0 6px 0 0;
+	white-space: nowrap;
+}
+
+.x.axis, .y.axis{
+
+	.tick line{
+
+			color: #bababa;
+
+			stroke-width: .5px;
+
+	}
+
+	text{
+		font-family: 'Guardian Text Sans Web', Arial, sans-serif;
+	    font-weight: 400;
+	    font-size: 12px;
+	    line-height: 16px;
+	    text-align: left;
+	    fill: rgb(146,146,151);
+	    font-style: normal;
+	}
+}
+
+.y.axis .tick:first-child{
+
+	line{
+
+			color: #333;
+
+			stroke-width: 1px;
+
+	}
+
+}
+
+.tooltip-wrapper{
+	position: relative;
+	width: 100%;
+}
+
+.tooltip{
+
+		pointer-events: none;
+		height: max-content;
+		width: max-content;
+		color: #333333;
+		position: absolute;
+		z-index: 100000;
+		line-height: 18.2px;
+		
+		opacity: 0;
+
+		&.over{
+			opacity: 1;
+		}
+
+		font-family: 'Guardian Text Sans Web', Arial, sans-serif;
+	    font-weight: bold;
+	    font-size: 16px;
+	    line-height: 16px;
+	    text-align: left;
+	    fill: #333;
+	    font-style: normal;
+		
+			
+		
+		
+}
+
+.tooltip-border{
+	  -webkit-text-stroke-width: 3px;
+	  -webkit-text-stroke-color: white;
+	  stroke-linecap: round;
+}
+
+.key-wrapper{
+
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+
+	margin: 12px 0 0 0;
+}
+
+.key-color-wrapper{
+	display: flex;
+	flex-direction: row;
+	margin: 0 12px 6px 0;
+}
+
+
+.key-color{
+	height: 12px;
+	width: 12px;
+	border-radius: 44px;
+	margin-right: 4px;
+	align-self: center;
+}
+
+.key-text{
+	font-family: 'Guardian Text Sans Web', Arial, sans-serif;
+	font-weight: bold;
+	font-size: 16px;
+	line-height: 16px;
+	text-align: left;
+	fill: #333;
+	font-style: normal;
+	height: 12px;
+	align-self: center;
+}
+
+.key-Oceania{background-color:#c70000;}
+.key-Africa{background-color:#EFEFEF;}
+.key-Europe{background-color:#E6F5FF;}
+.key-Asia{background-color:#00B2FF;}
+.key-South-America{background-color:#056DA1;}
+.key-North-America{background-color:#951D7A;}
 
 
