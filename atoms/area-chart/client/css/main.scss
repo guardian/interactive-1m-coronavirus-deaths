@@ -128,11 +128,19 @@
 }
 
 .tooltip-wrapper{
+	
 	position: relative;
-	width: 100%;
+	max-width:120px;
 }
 
 .tooltip{
+	border: 1px solid white;
+	max-width:120px;
+
+	transition: opacity 1s;
+	-webkit-transition: opacity 1s;
+
+	shape-rendering:auto;
 
 		pointer-events: none;
 		height: max-content;

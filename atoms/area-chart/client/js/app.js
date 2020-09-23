@@ -114,9 +114,6 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1YyNb9oLJOIgIUZcu-FpvCnlua
 
 		dataCountries.push(objCountry)
 
-		//dataContinentsByDate[date] = objCountry;
-
-
 		dataContinents.push({date:date})
 
 		continents.map(continent => {
@@ -190,7 +187,7 @@ const makeSlot = (id, date, deaths) => {
 	.attr('class','tooltip tooltip-border');
 
 	tooltipWrapper
-	.append('text')
+	.append('span')
 	.attr('class','tooltip tooltip-fill')
 
 	let svg = atom.append('svg')
@@ -304,11 +301,16 @@ const makeContinentChart = (svg, data) => {
 	}
 }
 
+
+let tt;
+let posX;
+let posY;
+let events = false;
+
 const makeCountryChart = (svg, data) => {
 
 	if(data)
 	{
-		let tt;
 		let key;
 		let id;
 		let enviroment;
@@ -325,7 +327,7 @@ const makeCountryChart = (svg, data) => {
 		.attr("d", d => area(d, true))
 		.on("mouseover", (event, d) => {
 
-			console.log('improved')
+			events = true;
 
 			id = event.target.parentNode.parentNode.parentNode.id;
 
@@ -353,6 +355,8 @@ const makeCountryChart = (svg, data) => {
 		})
 		.on("mouseout", event => {
 
+			events = false;
+
 			key
 			.classed('fill-over', false)
 
@@ -368,8 +372,8 @@ const makeCountryChart = (svg, data) => {
 		    let tWidth = bRect.width;
 		    let tHeight = bRect.height;
 
-		    let posX = left - tWidth - 6;
-		    let posY = top - tHeight - 6;
+		    posX = left - tWidth - 6;
+		    posY = top - tHeight - 6;
 
 		    tt.style('left',  posX + 'px')
 		    tt.style('top', posY + 'px')
@@ -382,7 +386,15 @@ const makeCountryChart = (svg, data) => {
 		.attr('d',area)
 
 	}
-	
+}
+
+
+if(events)
+{
+	d3.timer(function() {
+	  	tt.stryle("top", posY + 'px');
+	  	tt.stryle("left", posX + 'px');
+	});
 }
 
 window.onscroll = (ev) => {
