@@ -1,0 +1,304 @@
+.element-atom,
+.interactive-atom {
+  margin: 0 !important;
+
+}
+
+
+.content--interactive {
+    background-color: #fff
+}
+
+.content--interactive:not(.paid-content) .element-interactive {
+  background-color: #fff;
+}
+
+.content--interactive .content__headline,
+.headline {
+  padding-top: 0 !important;
+  &::before {
+    content: "";
+    display: block;
+    background-image: url("<%= path %>/images/covid_spread_world.gif");
+    background-repeat: no-repeat;
+    background-size: 95%;
+    background-position: 50% 30%;
+    position: relative;
+    z-index: 1;
+    padding-bottom: 110%;
+    padding-top: 10%;
+    width: calc(100% + 20px);
+    left: -10px;
+    top: -3px;
+    z-index: 99;
+    background-color: #121212;
+    @include mq(mobileLandscape) {
+      width: 100vw;
+      margin-left: 50%;
+      transform: translateX(-50%);
+    }
+    @include mq(tablet) {
+      width: 100vw;
+      background-size: 85%;
+      background-position: 50% 55%;
+      margin-left: 50%;
+      padding-top: 150px;
+      padding-bottom: 120px;
+      height: 448px;
+      height: 600px;
+      background-image: url("<%= path %>/images/covid_spread_world.gif");
+    }
+
+    @include mq(desktop) {
+      margin-left: -10px;
+      background-size: 95%;
+      background-position: 50% 63%;
+      padding-bottom: 180px;
+      width: 980px;
+      height: 448px;
+      height: 650px;
+      transform: translateX(0);
+      background-image: url("<%= path %>/images/covid_spread_world.gif");
+    }
+    @include mq(leftCol) {
+      background-size: 85%;
+      width: 1300px;
+      height: 700px;
+      margin-left: -250px;
+    }
+  }
+  &::after {
+    content: "1,000,000";
+    display: block;
+    @include fs-titlepiece(1);
+    font-size: 18vw;
+    color: #fff;
+    position: absolute;
+    left: 50%;
+    bottom: 270px;
+    transform: translateX(-50%);
+    z-index: 99;
+
+    @include mq(mobileLandscape) {
+      font-size: 18vw;
+    }
+
+    @include mq(tablet) {
+
+      font-size: 140px;
+      line-height: 140px;
+      bottom: auto;
+      top: 100px;
+    }
+
+    @include mq(desktop) {
+      margin-left: 160px;
+      font-size: 180px;
+      line-height: 180px;
+    }
+    @include mq(leftCol) {
+      margin-left: 80px;
+      font-size: 220px;
+      line-height: 220px;
+      //bottom: 120px;
+
+    }
+    @include mq(wide) {
+      font-size: 240px;
+      line-height: 240px;
+      bottom: 120px;
+    }
+  }
+}
+
+.content--interactive .content__main-column .content__headline {
+  @include fs-titlepiece(1);
+  font-size: 36px;
+  position: relative;
+  padding-top: 0;
+  @include mq(mobileMedium) {
+    @include fs-titlepiece(1);
+  }
+
+  @include mq(tablet) {
+    @include fs-titlepiece(2);
+
+  }
+  @include mq(leftCol) {
+    padding-top: 10px;
+  }
+}
+
+.content__standfirst,
+.standfirst, .content--interactive .content__standfirst {
+  @include fs-headline(1);
+  font-weight: 200;
+  margin-top: 24px;
+  max-width: 90%;
+  margin-bottom: 48px;
+
+  @include mq(mobileMedium) {
+    @include fs-headline(2);
+    font-weight: 200;
+  }
+  @include mq(mobileLandscape) {
+    max-width: 80%;
+  }
+  @include mq(tablet) {
+    max-width: 540px;
+  }
+}
+
+.u-cf {
+  .content__meta-container,
+  .meta__extras {
+    margin-left: -10px;
+    margin-right: -10px;
+    width: 100%;
+    padding-right: 10px;
+    padding-left: 10px;
+
+    @include mq(mobileLandscape) {
+      margin-right: -20px;
+      margin-left: -20px;
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+    @include mq(desktop) {
+      margin-right: -20px;
+      margin-left: -20px;
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+    @include mq(leftCol) {
+      margin-left: -10px;
+      margin-right: -10px;
+      padding-left: 10px;
+      padding-right: 0px;
+    }
+  }
+  .meta__extras {
+    @include mq(desktop) {
+      margin-left: -10px;
+    }
+  }
+}
+
+.meta__numbers {
+  @include mq(desktop) {
+    margin-right: calc(960px - 620px);
+  }
+}
+
+.content__meta-container {
+  @include mq(desktop) {
+    width: 960px !important;
+  }
+  @include mq(wide) {
+    width: 1040px !important;
+  }
+}
+
+.l-side-margins::before,
+.l-side-margins::after {
+  z-index: 9999;
+}
+
+.content__main,
+.content__head {
+  position: relative;
+  &:before {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    min-height: 500px;
+    content: " ";
+    border-left: 1px solid $neutral-replacement;
+
+    @include mq(leftCol) {
+      left: calc((100% - 1140px) / 2 + 170px);
+    }
+
+    @include mq(wide) {
+      left: calc((100% - 1300px) / 2 + 250px);
+    }
+  }
+
+  .byline {
+    border-top: none !important;
+    margin-top: 5px;
+  }
+}
+
+a,
+.u-fauxlink {
+  color: $news-main;
+  cursor: pointer;
+  text-decoration: none;
+}
+.tonal--tone-news .tone-colour {
+  color: $news-main;
+}
+
+.content__meta-container {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    $neutral-replacement,
+    $neutral-replacement 0.0625rem,
+    transparent 0.0625rem,
+    transparent 0.25rem
+  );
+  background-repeat: repeat-x;
+  background-position: top;
+  -webkit-background-size: 0.0625rem 0.8125rem;
+  background-size: 0.0625rem 0.8125rem;
+  padding-top: 12px;
+  border-top: none;
+}
+
+.ios,
+.android {
+  .article__header .headline {
+    padding: 4px 12px 30px 12px;
+  }
+  .headline {
+    @include fs-headline(5);
+    font-weight: 700;
+  
+    @include mq(mobileMedium) {
+      @include fs-headline(6);
+      font-weight: 700;
+    }
+  }
+  .headline:after {
+    top: calc(44vw + 10px);
+    width: calc(100% + 10px);
+  }
+  .standfirst {
+    @include fs-headline(1);
+    font-weight: 200;
+    margin-bottom: 20px;
+    margin-top: 0px;
+  }
+  .byline {
+      a {
+      @include fs-header(1);
+      font-size: 17px;
+      font-weight: 700;
+    }
+  }
+  h2 {
+    @include fs-header(1);
+    font-weight: 700;
+    margin-top: 36px;
+    margin-bottom: 6px;
+  }
+}
+
+.content__labels {
+  box-sizing: border-box;
+  position: absolute;
+  z-index: 9999999999;
+  overflow: hidden;
+  padding-top: 0.1875rem;
+}
