@@ -197,6 +197,7 @@ const makeSlot = (id, date, deaths) => {
 	.attr('width', width)
 	.attr('height', height)
 	.attr('class', 'gv-1m-deaths-svg-' + id)
+	.attr('id', 'gv-1m-deaths-svg-' + id)
 
 	svg.append("g")
 	.call(xAxis); 
