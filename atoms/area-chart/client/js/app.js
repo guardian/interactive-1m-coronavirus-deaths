@@ -2,7 +2,7 @@ import * as d3 from 'd3'
 import textures from 'textures'
 import {TweenMax} from "gsap";
 import {numberWithCommas} from 'shared/js/util.js'
-console.log('v-1')
+console.log('v-2')
 const slots = d3.selectAll("div[id*='interactive-slot-']").nodes();
 
 let isMobile = window.matchMedia('(max-width: 700px)').matches;
@@ -211,10 +211,13 @@ const makeSlot = (id, date, deaths) => {
 
 	let index = keyDates.findIndex(d => d.date === date)
 
+	xScale.domain([iniDate,timeParse(keyDates[index+1].date)])
 
-	makeContinentChart(svg,stacked(dataContinents.filter(d => timeParse(d.date[index+1]) <= timeParse(date))))
+	yScale.domain([0,keyDates[index+1].deaths]);
 
-	makeCountryChart(svg,stacked(dataCountries.filter(d => timeParse(d.date[index+1]) <= timeParse(date))))
+	makeContinentChart(svg,stacked(dataContinents.filter(d => timeParse(d.date) <= timeParse(keyDates[index+1].date))))
+
+	makeCountryChart(svg,stacked(dataCountries.filter(d => timeParse(d.date) <= timeParse(keyDates[index+1].date))))
 
 	update(svg, date, counter, deaths)
 	
@@ -223,7 +226,11 @@ const makeSlot = (id, date, deaths) => {
 const update = (svg, date, counter, deaths, continents) => {
 
 	yScale.domain([0,deaths]);
+	
 	xScale.domain([iniDate,timeParse(date)])
+
+	
+
 
 	counter.select('.counter-date')
 	.html(beautyDate(date))
