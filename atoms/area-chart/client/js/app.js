@@ -2,7 +2,7 @@ import * as d3 from 'd3'
 import textures from 'textures'
 import {TweenMax} from "gsap";
 import {numberWithCommas} from 'shared/js/util.js'
-console.log('v-2')
+console.log('v-10')
 const slots = d3.selectAll("div[id*='interactive-slot-']").nodes();
 
 let isMobile = window.matchMedia('(max-width: 700px)').matches;
@@ -19,7 +19,7 @@ let keyDates = [];
 
 let getContinent = [];
 
-let used = [0];
+let used = [];
 
 const margin = {top:15,right:60,bottom:20,left:50}
 
@@ -37,10 +37,11 @@ let height =  isMobile ? window.innerHeight - 100: width * 2.5 / 4;
 
 let xScale = d3.scaleTime()
 .range([0, width])
-.domain([iniDate, endDate]);
+.domain([iniDate, timeParse('3/13/20')]);
 
 let yScale = d3.scaleLinear()
 .range([height - margin.bottom, margin.top])
+.domain([0, 0]);
 
 let area = d3.area()
 .x(d => xScale(timeParse(d.data.date)))
@@ -143,12 +144,17 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1YyNb9oLJOIgIUZcu-FpvCnlua
 
 	})
 
+
+
+
 	keyDates.map((date,i) => {
 
 		let index = i == 0 ? 0 : i-1;
 
 		makeSlot(i+1, keyDates[index].date, keyDates[index].deaths)
 	})
+
+
 
 
 })
@@ -211,15 +217,21 @@ const makeSlot = (id, date, deaths) => {
 
 	let index = keyDates.findIndex(d => d.date === date)
 
-	xScale.domain([iniDate,timeParse(keyDates[index+1].date)])
+	console.log(id)
 
-	yScale.domain([0,keyDates[index+1].deaths]);
+	let data;
+	if(id > 1)data= dataContinents.filter(d => timeParse(d.date) <= timeParse(keyDates[index+1].date));
+	else data = dataContinents.filter(d => timeParse(d.date) <= timeParse(keyDates[index].date));
 
-	makeContinentChart(svg,stacked(dataContinents.filter(d => timeParse(d.date) <= timeParse(keyDates[index+1].date))))
+	
 
-	makeCountryChart(svg,stacked(dataCountries.filter(d => timeParse(d.date) <= timeParse(keyDates[index+1].date))))
 
-	update(svg, date, counter, deaths)
+	makeContinentChart(svg,stacked(data))
+
+	yScale.domain([0,deaths]);
+	
+	xScale.domain([iniDate,timeParse(date)])
+	
 	
 }
 
@@ -228,9 +240,6 @@ const update = (svg, date, counter, deaths, continents) => {
 	yScale.domain([0,deaths]);
 	
 	xScale.domain([iniDate,timeParse(date)])
-
-	
-
 
 	counter.select('.counter-date')
 	.html(beautyDate(date))
@@ -277,7 +286,6 @@ const update = (svg, date, counter, deaths, continents) => {
 	});
 
 	makeContinentChart(svg);
-	makeCountryChart(svg);
 
 	svg.selectAll(".y.axis")
 	.transition().duration(1000)
@@ -292,11 +300,12 @@ const update = (svg, date, counter, deaths, continents) => {
 }
 
 
-const makeContinentChart = (svg, data) => {
+const makeContinentChart = (svg, data = null) => {
 
 
-	if(data)
+	if(data != null)
 	{
+
 		let continentsFill = svg.append('g')
 		.attr('class', 'continent-fill-g')
 		.selectAll('path')
@@ -309,17 +318,28 @@ const makeContinentChart = (svg, data) => {
 	}
 	else
 	{
+
 		svg.selectAll('.continent-fill')
 		.transition()
 		.duration(1000)
 		.attr('d',area)
+		.on('end', (d,i) => {
+
+			
+			if(i==5)
+			{
+
+				let date = d[d.length-1].data.date;
+				console.log(date)
+				makeCountryChart(svg,stacked(dataCountries.filter(d => timeParse(d.date) <= timeParse(date))))
+			}
+		})
 	}
 }
 
 const makeCountryChart = (svg, data) => {
 
-	if(data)
-	{
+
 		let key;
 		let id;
 		let enviroment;
@@ -401,17 +421,10 @@ const makeCountryChart = (svg, data) => {
 		})
 		.on("click", (event, d) => {
 
-			id = event.target.parentNode.parentNode.parentNode.id;
-
-			enviroment = +id.split('interactive-slot-')[1] -1;
-
-			tt = d3.selectAll('#' + id + ' .tooltip')
-
-			key = svg.select('.' + d.key.replace(/\s/g, '-'));
-
-			date = keyDates[enviroment].date;
-
-			countryData = dictionary[date]
+			
+			svg
+			.selectAll('path')
+			.classed('fill-over', false)
 
 			tt
 			.classed('over', true)
@@ -421,8 +434,6 @@ const makeCountryChart = (svg, data) => {
 
 			tt
 			.html(  d.key + '<br>' + numberWithCommas(countryData[d.key]))
-
-			bRect = tt.node().getBoundingClientRect();
 
 			let tWidth = bRect.width;
 			let tHeight = bRect.height;
@@ -456,29 +467,6 @@ const makeCountryChart = (svg, data) => {
 		    tt.style('top', posY + 'px')
 
 		})
-		/*.on("mousemove", (event, d) => {
-
-			let here = d3.pointer(event);
-
-		    //let left = here[0];
-		    let top = here[1];
-		    let tWidth = bRect.width;
-		    let tHeight = bRect.height;
-
-		    let posX = width - tWidth - 6;
-		    let posY = top - tHeight - 6;
-
-		    tt.style('left',  posX + 'px')
-		    tt.style('top', posY + 'px')
-
-		})*/
-	}
-	else
-	{
-		svg.selectAll('.country-fill')
-		.attr('d',area)
-
-	}
 }
 
 
