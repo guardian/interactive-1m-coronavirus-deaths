@@ -25,8 +25,8 @@
     background-position: 50% 30%;
     position: relative;
     z-index: 1;
-    padding-bottom: 110%;
-    padding-top: 10%;
+    padding-bottom: 100%;
+    //padding-top: 10%;
     width: calc(100% + 20px);
     left: -10px;
     top: -3px;
@@ -40,10 +40,10 @@
     @include mq(tablet) {
       width: 100vw;
       background-size: 85%;
-      background-position: 50% 55%;
+      background-position: 50% 75%;
       margin-left: 50%;
-      padding-top: 150px;
-      padding-bottom: 120px;
+      //padding-top: 150px;
+      padding-bottom: 0;
       height: 448px;
       height: 600px;
       background-image: url("<%= path %>/images/covid_global_spread_desktop_header.gif");
@@ -52,18 +52,22 @@
     @include mq(desktop) {
       margin-left: -10px;
       background-size: 95%;
-      background-position: 50% 63%;
-      padding-bottom: 180px;
+      background-position: 50% 73%;
+      //padding-bottom: 180px;
       width: 980px;
       height: 448px;
-      height: 650px;
+      height: 700px;
       transform: translateX(0);
       background-image: url("<%= path %>/images/covid_global_spread_desktop_header.gif");
     }
     @include mq(leftCol) {
       background-size: 85%;
+      width: 100vw;
+      height: 750px;
+      margin-left: -220px;
+    }
+    @include mq(wide) {
       width: 1300px;
-      height: 700px;
       margin-left: -250px;
     }
   }
@@ -75,7 +79,7 @@
     color: #fff;
     position: absolute;
     left: 50%;
-    bottom: 270px;
+    top: 55vw;
     transform: translateX(-50%);
     z-index: 99;
 
@@ -88,7 +92,7 @@
       font-size: 140px;
       line-height: 140px;
       bottom: auto;
-      top: 100px;
+      top: 70px;
     }
 
     @include mq(desktop) {
