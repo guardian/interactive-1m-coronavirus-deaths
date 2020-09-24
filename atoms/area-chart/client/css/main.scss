@@ -21,9 +21,9 @@
 }
 
 .Oceania{fill:#c70000;}
-.Africa{fill:#EFEFEF;}
-.Europe{fill:#E6F5FF;}
-.Asia{fill:#00B2FF;}
+.Africa{fill:#B3B3B4;}
+.Europe{fill:#00B2FF;}
+.Asia{fill:#1896D7;}
 .South-America{fill:#056DA1;}
 .North-America{fill:#951D7A;}
 
@@ -60,7 +60,7 @@
 
 	span{
 		@include fs-titlepiece(1);
-		align-self: end;
+		align-self: flex-end;
 		color: #333;
 		font-size: 16px;
 		height: 36px;
@@ -135,11 +135,11 @@
 }
 
 .tooltip{
-	border: 1px solid white;
+
 	max-width:120px;
 
-	transition: opacity 1s;
-	-webkit-transition: opacity 1s;
+	transition: opacity 0.3s;
+	-webkit-transition: opacity 0.3s;
 
 	shape-rendering:auto;
 
@@ -209,9 +209,9 @@
 }
 
 .key-Oceania{background-color:#c70000;}
-.key-Africa{background-color:#EFEFEF;}
-.key-Europe{background-color:#E6F5FF;}
-.key-Asia{background-color:#00B2FF;}
+.key-Africa{background-color:#B3B3B4;}
+.key-Europe{background-color:#00B2FF;}
+.key-Asia{background-color:#1896D7;}
 .key-South-America{background-color:#056DA1;}
 .key-North-America{background-color:#951D7A;}
 

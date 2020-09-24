@@ -2,7 +2,7 @@ import * as d3 from 'd3'
 import textures from 'textures'
 import {TweenMax} from "gsap";
 import {numberWithCommas} from 'shared/js/util.js'
-
+console.log('v-1')
 const slots = d3.selectAll("div[id*='interactive-slot-']").nodes();
 
 let isMobile = window.matchMedia('(max-width: 700px)').matches;
@@ -41,7 +41,6 @@ let xScale = d3.scaleTime()
 
 let yScale = d3.scaleLinear()
 .range([height - margin.bottom, margin.top])
-.domain([0, 1010000]);
 
 let area = d3.area()
 .x(d => xScale(timeParse(d.data.date)))
@@ -142,9 +141,13 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1YyNb9oLJOIgIUZcu-FpvCnlua
 
 		keyDates.push({date:date, deaths:deaths})
 
+	})
+
+	keyDates.map((date,i) => {
+
 		let index = i == 0 ? 0 : i-1;
 
-		makeSlot(i+1, response.sheets.Graphic_KeyDates[index].Date, response.sheets.Graphic_KeyDates[index].Deaths)
+		makeSlot(i+1, keyDates[index].date, keyDates[index].deaths)
 	})
 
 
@@ -204,15 +207,22 @@ const makeSlot = (id, date, deaths) => {
 	d3.select('.y.axis .domain').remove()
 	d3.selectAll('.x.axis .domain').remove()
 
-	makeContinentChart(svg,stacked(dataContinents))
 
-	makeCountryChart(svg,stacked(dataCountries))
+	let index = keyDates.findIndex(d => d.date === date)
+
+
+	makeContinentChart(svg,stacked(dataContinents.filter(d => timeParse(d.date[index+1]) <= timeParse(date))))
+
+	makeCountryChart(svg,stacked(dataCountries.filter(d => timeParse(d.date[index+1]) <= timeParse(date))))
 
 	update(svg, date, counter, deaths)
 	
 }
 
 const update = (svg, date, counter, deaths, continents) => {
+
+	yScale.domain([0,deaths]);
+	xScale.domain([iniDate,timeParse(date)])
 
 	counter.select('.counter-date')
 	.html(beautyDate(date))
@@ -258,9 +268,6 @@ const update = (svg, date, counter, deaths, continents) => {
 		  }
 	});
 
-	yScale.domain([0,deaths]);
-	xScale.domain([iniDate,timeParse(date)])
-
 	makeContinentChart(svg);
 	makeCountryChart(svg);
 
@@ -296,16 +303,10 @@ const makeContinentChart = (svg, data) => {
 	{
 		svg.selectAll('.continent-fill')
 		.transition()
-		.duration(500)
+		.duration(1000)
 		.attr('d',area)
 	}
 }
-
-
-let tt;
-let posX;
-let posY;
-let events = false;
 
 const makeCountryChart = (svg, data) => {
 
@@ -317,6 +318,7 @@ const makeCountryChart = (svg, data) => {
 		let date;
 		let countryData;
 		let bRect;
+		let tt;
 
 		let countries = svg.append('g')
 		.selectAll('path')
@@ -326,8 +328,6 @@ const makeCountryChart = (svg, data) => {
 		.attr('class', d => 'country-fill ' + d.key.replace(/\s/g, '-'))
 		.attr("d", d => area(d, true))
 		.on("mouseover", (event, d) => {
-
-			events = true;
 
 			id = event.target.parentNode.parentNode.parentNode.id;
 
@@ -350,35 +350,120 @@ const makeCountryChart = (svg, data) => {
 			tt
 			.html(  d.key + '<br>' + numberWithCommas(countryData[d.key]))
 
-			bRect = d3.select('#' + event.target.parentNode.parentNode.parentNode.id + ' .tooltip').node().getBoundingClientRect()
+			bRect = tt.node().getBoundingClientRect();
+
+			let tWidth = bRect.width;
+			let tHeight = bRect.height;
+
+			let posX = width - tWidth - 6;
+
+
+			var BreakException = {};
+			let acum = [];
+
+			let localYScale = d3.scaleLinear()
+			.range([height - margin.bottom, margin.top])
+			.domain([0,keyDates[enviroment].deaths]);
+
+			
+			try{
+
+				Object.entries(countryData).slice(1).forEach( o => {
+					acum.push(o[1])
+					if(o[0] == d.key)throw BreakException 
+				})
+			}
+			catch (e){
+				if (e !== BreakException) throw e;
+			}
+
+			let posY = (localYScale(d3.sum(acum))  - tHeight - 6);
+
+
+			tt.style('left',  posX + 'px')
+		    tt.style('top', posY + 'px')
 
 		})
 		.on("mouseout", event => {
-
-			events = false;
-
 			key
 			.classed('fill-over', false)
 
 			tt
 			.classed('over', false)
 		})
-		.on("mousemove", (event, d) => {
+		.on("click", (event, d) => {
+
+			id = event.target.parentNode.parentNode.parentNode.id;
+
+			enviroment = +id.split('interactive-slot-')[1] -1;
+
+			tt = d3.selectAll('#' + id + ' .tooltip')
+
+			key = svg.select('.' + d.key.replace(/\s/g, '-'));
+
+			date = keyDates[enviroment].date;
+
+			countryData = dictionary[date]
+
+			tt
+			.classed('over', true)
+
+			key
+			.classed('fill-over', true)
+
+			tt
+			.html(  d.key + '<br>' + numberWithCommas(countryData[d.key]))
+
+			bRect = tt.node().getBoundingClientRect();
+
+			let tWidth = bRect.width;
+			let tHeight = bRect.height;
+
+			let posX = width - tWidth - 6;
+
+
+			var BreakException = {};
+			let acum = [];
+
+			let localYScale = d3.scaleLinear()
+			.range([height - margin.bottom, margin.top])
+			.domain([0,keyDates[enviroment].deaths]);
+
+			
+			try{
+
+				Object.entries(countryData).slice(1).forEach( o => {
+					acum.push(o[1])
+					if(o[0] == d.key)throw BreakException 
+				})
+			}
+			catch (e){
+				if (e !== BreakException) throw e;
+			}
+
+			let posY = (localYScale(d3.sum(acum))  - tHeight - 6);
+
+
+			tt.style('left',  posX + 'px')
+		    tt.style('top', posY + 'px')
+
+		})
+		/*.on("mousemove", (event, d) => {
 
 			let here = d3.pointer(event);
 
-		    let left = here[0];
+		    //let left = here[0];
 		    let top = here[1];
 		    let tWidth = bRect.width;
 		    let tHeight = bRect.height;
 
-		    posX = left - tWidth - 6;
-		    posY = top - tHeight - 6;
+		    let posX = width - tWidth - 6;
+		    let posY = top - tHeight - 6;
 
 		    tt.style('left',  posX + 'px')
 		    tt.style('top', posY + 'px')
 
-		})
+		})*/
 	}
 	else
 	{
@@ -389,13 +474,9 @@ const makeCountryChart = (svg, data) => {
 }
 
 
-if(events)
-{
-	d3.timer(function() {
-	  	tt.stryle("top", posY + 'px');
-	  	tt.stryle("left", posX + 'px');
-	});
-}
+	
+
+
 
 window.onscroll = (ev) => {
 
