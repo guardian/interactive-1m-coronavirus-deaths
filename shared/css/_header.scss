@@ -62,9 +62,9 @@
     }
     @include mq(leftCol) {
       background-size: 85%;
-      width: 100vw;
+      width: 1140px;
       height: 750px;
-      margin-left: -220px;
+      margin-left: -170px;
     }
     @include mq(wide) {
       width: 1300px;
