@@ -13,15 +13,13 @@ let dataContinents = [];
 
 const dataCountries = [];
 
-let dictionary = [];
+const countriesByDate = [];
 
 let keyDates = [];
 
-let getContinent = [];
+let svgUsed = [];
 
-let used = [];
-
-const margin = {top:15,right:60,bottom:20,left:50}
+const margin = {top:15,right:1,bottom:20,left:50}
 
 let lastScrollTop = 0;
 
@@ -36,7 +34,7 @@ let width = atomEl.getBoundingClientRect().width;
 let height =  isMobile ? window.innerHeight - 100: width * 2.5 / 4;
 
 let xScale = d3.scaleTime()
-.range([0, width])
+.range([0, width + margin.right])
 .domain([timeParse('1/01/20'), iniDate]);
 
 let yScale = d3.scaleLinear()
@@ -116,6 +114,8 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1YyNb9oLJOIgIUZcu-FpvCnlua
 
 		dataContinents.push({date:date})
 
+		countriesByDate[date] = objCountry;
+
 		continents.map(continent => {
 
 			let con = rawData.filter(f => f.Continent === continent);
@@ -129,10 +129,6 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1YyNb9oLJOIgIUZcu-FpvCnlua
 		})
 
 	})
-
-	dictionary = toDict(dataCountries)
-
-	rawData.map(entry => getContinent[entry['Country/Region']] = entry.Continent);
 
 	response.sheets.Graphic_KeyDates.map((keydate,i) => {
 
@@ -154,17 +150,7 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1YyNb9oLJOIgIUZcu-FpvCnlua
 		makeSlot(i+1, keyDates[index].date, keyDates[index].deaths)
 	})
 
-
-
-
 })
-
-const toDict = (arr) => {
-	const out = {}
-	arr.forEach(o => out[o["date"]] = o)
-
-	return out
-}
 
 const makeSlot = (id, date, deaths) => {
 
@@ -237,8 +223,7 @@ const makeSlot = (id, date, deaths) => {
 
 const update = (svg, date, counter, deaths, continents) => {
 
-	yScale.domain([0,deaths]);
-	
+	yScale.domain([0,deaths]);	
 	xScale.domain([iniDate,timeParse(date)])
 
 	counter.select('.counter-date')
@@ -330,7 +315,11 @@ const makeContinentChart = (svg, data = null) => {
 			{
 
 				let date = d[d.length-1].data.date;
-				console.log(date)
+				let deaths = d[d.length-1][1];
+
+				yScale.domain([0,deaths]);	
+				xScale.domain([iniDate,timeParse(date)])
+	
 				makeCountryChart(svg,stacked(dataCountries.filter(d => timeParse(d.date) <= timeParse(date))))
 			}
 		})
@@ -339,13 +328,7 @@ const makeContinentChart = (svg, data = null) => {
 
 const makeCountryChart = (svg, data) => {
 
-
 		let key;
-		let id;
-		let enviroment;
-		let date;
-		let countryData;
-		let bRect;
 		let tt;
 
 		let countries = svg.append('g')
@@ -357,59 +340,19 @@ const makeCountryChart = (svg, data) => {
 		.attr("d", d => area(d, true))
 		.on("mouseover", (event, d) => {
 
-			id = event.target.parentNode.parentNode.parentNode.id;
+			let id = event.target.parentNode.parentNode.parentNode.id;
 
-			enviroment = +id.split('interactive-slot-')[1] -1;
+			let enviroment = +id.split('interactive-slot-')[1] -1;
 
 			tt = d3.selectAll('#' + id + ' .tooltip')
 
 			key = svg.select('.' + d.key.replace(/\s/g, '-'));
 
-			date = keyDates[enviroment].date;
+			let date = keyDates[enviroment].date;
 
-			countryData = dictionary[date]
+			let countryData = countriesByDate[date]
 
-			tt
-			.classed('over', true)
-
-			key
-			.classed('fill-over', true)
-
-			tt
-			.html(  d.key + '<br>' + numberWithCommas(countryData[d.key]))
-
-			bRect = tt.node().getBoundingClientRect();
-
-			let tWidth = bRect.width;
-			let tHeight = bRect.height;
-
-			let posX = width - tWidth - 6;
-
-
-			var BreakException = {};
-			let acum = [];
-
-			let localYScale = d3.scaleLinear()
-			.range([height - margin.bottom, margin.top])
-			.domain([0,keyDates[enviroment].deaths]);
-
-			
-			try{
-
-				Object.entries(countryData).slice(1).forEach( o => {
-					acum.push(o[1])
-					if(o[0] == d.key)throw BreakException 
-				})
-			}
-			catch (e){
-				if (e !== BreakException) throw e;
-			}
-
-			let posY = (localYScale(d3.sum(acum))  - tHeight - 6);
-
-
-			tt.style('left',  posX + 'px')
-		    tt.style('top', posY + 'px')
+			manageHovering(tt,key,d.key, countryData, enviroment)	
 
 		})
 		.on("mouseout", event => {
@@ -426,53 +369,62 @@ const makeCountryChart = (svg, data) => {
 			.selectAll('path')
 			.classed('fill-over', false)
 
-			tt
-			.classed('over', true)
+			let id = event.target.parentNode.parentNode.parentNode.id;
 
-			key
-			.classed('fill-over', true)
+			let enviroment = +id.split('interactive-slot-')[1] -1;
 
-			tt
-			.html(  d.key + '<br>' + numberWithCommas(countryData[d.key]))
+			tt = d3.selectAll('#' + id + ' .tooltip')
 
-			let tWidth = bRect.width;
-			let tHeight = bRect.height;
+			key = svg.select('.' + d.key.replace(/\s/g, '-'));
 
-			let posX = width - tWidth - 6;
+			let date = keyDates[enviroment].date;
 
+			let countryData = countriesByDate[date]
 
-			var BreakException = {};
-			let acum = [];
-
-			let localYScale = d3.scaleLinear()
-			.range([height - margin.bottom, margin.top])
-			.domain([0,keyDates[enviroment].deaths]);
-
-			
-			try{
-
-				Object.entries(countryData).slice(1).forEach( o => {
-					acum.push(o[1])
-					if(o[0] == d.key)throw BreakException 
-				})
-			}
-			catch (e){
-				if (e !== BreakException) throw e;
-			}
-
-			let posY = (localYScale(d3.sum(acum))  - tHeight - 6);
-
-
-			tt.style('left',  posX + 'px')
-		    tt.style('top', posY + 'px')
-
+			manageHovering(tt,key,d.key, countryData, enviroment)
 		})
 }
 
+const manageHovering = (tt,key,countryName, countryData, enviroment) => {
 
-	
+	console.log(countryData)
+	tt.classed('over', true)
 
+	key.classed('fill-over', true)
 
+	tt.html(  countryName + '<br>' + numberWithCommas(countryData[countryName]))
+
+	let bRect = tt.node().getBoundingClientRect();
+
+	let tWidth = bRect.width;
+	let tHeight = bRect.height;
+
+	let posX = width - tWidth - 6;
+
+	let acum = [];
+
+	let localYScale = d3.scaleLinear()
+	.range([height - margin.bottom, margin.top])
+	.domain([0,keyDates[enviroment].deaths]);
+
+	var BreakException = {};
+
+	try{
+
+		Object.entries(countryData).slice(1).forEach( o => {
+			acum.push(o[1])
+			if(o[0] == countryName)throw BreakException 
+		})
+	}
+	catch (e){
+		if (e !== BreakException) throw e;
+	}
+
+	let posY = (localYScale(d3.sum(acum))  - tHeight - 6);
+
+	tt.style('left',  posX + 'px')
+	tt.style('top', posY + 'px')
+}
 
 window.onscroll = (ev) => {
 
@@ -482,7 +434,7 @@ window.onscroll = (ev) => {
 
 		    slots.map( (s,i) => {
 
-		    	if(used.indexOf(i) == -1)
+		    	if(svgUsed.indexOf(i) == -1)
 		    	{
 
 		    		if(s.getBoundingClientRect().top <= (window.innerHeight / 2) + 100) {
@@ -491,7 +443,7 @@ window.onscroll = (ev) => {
 
 		    			update(d3.select('.gv-1m-deaths-svg-' + (i+1)), keyDates[i].date, d3.select('.counter' + (i+1)), keyDates[i].deaths, continents);
 
-		    			used.push(i)
+		    			svgUsed.push(i)
 
 		    		}
 
