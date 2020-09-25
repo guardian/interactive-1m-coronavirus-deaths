@@ -37,7 +37,7 @@ let height =  isMobile ? window.innerHeight - 100: width * 2.5 / 4;
 
 let xScale = d3.scaleTime()
 .range([0, width])
-.domain([iniDate, timeParse('3/13/20')]);
+.domain([timeParse('1/01/20'), iniDate]);
 
 let yScale = d3.scaleLinear()
 .range([height - margin.bottom, margin.top])
