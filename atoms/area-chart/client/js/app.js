@@ -140,9 +140,6 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1YyNb9oLJOIgIUZcu-FpvCnlua
 
 	})
 
-
-
-
 	keyDates.map((date,i) => {
 
 		let index = i == 0 ? 0 : i-1;
@@ -203,28 +200,41 @@ const makeSlot = (id, date, deaths) => {
 
 	let index = keyDates.findIndex(d => d.date === date)
 
-	console.log(id)
-
 	let data;
 	if(id > 1)data= dataContinents.filter(d => timeParse(d.date) <= timeParse(keyDates[index+1].date));
 	else data = dataContinents.filter(d => timeParse(d.date) <= timeParse(keyDates[index].date));
 
-	
-
 
 	makeContinentChart(svg,stacked(data))
 
-	yScale.domain([0,deaths]);
-	
-	xScale.domain([iniDate,timeParse(date)])
+	updateScales(date, deaths)
+
+
+	//FOR PRINT
+/*
+	keyDates.map(date => {
+
+					console.log(date.date, xScale(timeParse(date.date)))
+					svg.append('path')
+					.attr('d', `M ${xScale(timeParse(date.date))} 0 v ${height}` )
+					.attr('stroke', 'red')
+					.attr('date-dummy')
+				})*/
 	
 	
 }
 
+const updateScales = (date, deaths) => {
+
+
+	yScale.domain([0,deaths]);
+	
+	xScale.domain([iniDate,timeParse(date)])
+}
+
 const update = (svg, date, counter, deaths, continents) => {
 
-	yScale.domain([0,deaths]);	
-	xScale.domain([iniDate,timeParse(date)])
+	updateScales(date, deaths)
 
 	counter.select('.counter-date')
 	.html(beautyDate(date))
@@ -317,8 +327,7 @@ const makeContinentChart = (svg, data = null) => {
 				let date = d[d.length-1].data.date;
 				let deaths = d[d.length-1][1];
 
-				yScale.domain([0,deaths]);	
-				xScale.domain([iniDate,timeParse(date)])
+				updateScales(date, deaths)
 	
 				makeCountryChart(svg,stacked(dataCountries.filter(d => timeParse(d.date) <= timeParse(date))))
 			}
@@ -387,7 +396,6 @@ const makeCountryChart = (svg, data) => {
 
 const manageHovering = (tt,key,countryName, countryData, enviroment) => {
 
-	console.log(countryData)
 	tt.classed('over', true)
 
 	key.classed('fill-over', true)
