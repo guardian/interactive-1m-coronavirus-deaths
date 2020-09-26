@@ -81,6 +81,11 @@
     top: 35vw;
     transform: translateX(-50%);
     z-index: 99;
+    text-align: center;
+
+    @include mq(mobile) {
+      font-size: 18vw;
+    }
 
     @include mq(mobileLandscape) {
       font-size: 18vw;

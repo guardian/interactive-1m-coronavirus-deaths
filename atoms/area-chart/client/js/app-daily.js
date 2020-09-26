@@ -3,6 +3,8 @@ import * as d3Collection from 'd3-collection'
 import {TweenMax} from "gsap";
 import {numberWithCommas} from 'shared/js/util.js'
 
+console.log('appddaily')
+
 let d3 = Object.assign({}, d3B, d3Collection);
 console.log('v-11')
 const slots = d3.selectAll("div[id*='interactive-slot-']").nodes();
@@ -109,11 +111,15 @@ d3.json('https://interactive.guim.co.uk/docsdata/1YyNb9oLJOIgIUZcu-FpvCnluaBm0f_
 
 	//set data by date and value
 
-	dates.map(date => {
+	let prevDate;
+
+	dates.map((date,i) => {
+
+		prevDate = i > 0 ? prevDate = dates[i-1] : date;
 
 		let objCountry = {date:date};
 
-		data.map(country => objCountry[country['Country/Region']] = +country[date])
+		data.map(country => objCountry[country['Country/Region']] = +country[date] - +country[prevDate])
 
 		dataCountries.push(objCountry)
 
