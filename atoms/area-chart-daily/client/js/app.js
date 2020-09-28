@@ -4,7 +4,7 @@ import {TweenMax} from "gsap";
 import {numberWithCommas} from 'shared/js/util.js'
 
 let d3 = Object.assign({}, d3B, d3Collection);
-console.log('v-11')
+console.log('v-13-c')
 const slots = d3.selectAll("div[id*='interactive-slot-']").nodes();
 
 let isMobile = window.matchMedia('(max-width: 700px)').matches;
@@ -15,7 +15,7 @@ let dataContinentsAcum = [];
 let dataContinentsDaily = [];
 
 const dataCountriesAcum = [];
-const dataCountriesDaily = [];
+let dataCountriesDaily = [];
 
 let dataSelected = dataContinentsDaily;
 
@@ -218,6 +218,12 @@ const makeSlot = (id, date, deaths) => {
 	.attr('class', 'gv-1m-deaths-svg-' + id)
 	.attr('id', 'gv-1m-deaths-svg-' + id)
 
+	svg.append('g')
+	.attr('class', ('continent-fill-g'))
+
+	svg.append('g')
+	.attr('class', ('countries-buttons'))
+
 	svg.append("g")
 	.call(xAxis); 
 
@@ -236,19 +242,25 @@ const makeSlot = (id, date, deaths) => {
    d3.select(`.s-${id} .no2-slider__inner`)
    .on('click', (event,i) => {
 
+   		d3.selectAll(".gv-1m-deaths-svg-" + id + ' .countries-buttons path').remove()
+
    		let selected = d3.select(event.target).attr('class').indexOf('no2-right') == -1 ? true : false;
 
    		let dataContinents = selected == true ? dataContinentsAcum : dataContinentsDaily;
    		let dataCountriesSelected = selected == true ? dataCountriesAcum : dataCountriesDaily;
 
-   		dataSelected = dataContinents;
+   		console.log(dataContinents,id)
+
+   		if(id > 1)dataSelected = dataContinents.filter(d => timeParse(d.date) <= timeParse(keyDates[id-1].date) )
+   		else dataSelected = dataContinents.filter(d => timeParse(d.date) <= timeParse(keyDates[0].date) )
+
+   		if(id > 1)dataCountriesSelected = dataCountriesSelected.filter(d => timeParse(d.date) <= timeParse(keyDates[id-1].date) )
+   		else dataCountriesSelected = dataCountriesSelected.filter(d => timeParse(d.date) <= timeParse(keyDates[0].date) )
 
 	   	d3.select(event.target)
 	   	.classed('no2-right', selected);
 
-	   	let all = dataSelected.filter(d => timeParse(d.date) <= timeParse(keyDates[id-1].date));
-
-		let max = d3.max(all.map(d => d3.sum(Object.values(d))));
+		let max = d3.max(dataSelected.map(d => d3.sum(Object.values(d))));
 
 		let localYScale = d3.scaleLinear()
 		.range([height - margin.bottom, margin.top])
@@ -284,24 +296,24 @@ const makeSlot = (id, date, deaths) => {
 		}
 
 		d3.selectAll(".gv-1m-deaths-svg-" + id + " .y.axis")
-		.transition().duration(1000)
+		//.transition().duration(1000)
 		.call(localYAxis);
 
 		d3.select('.y.axis .domain').remove()
 
-	   	var rects = d3.select('.gv-1m-deaths-svg-' + id + ' .continent-fill-g')
-		  .selectAll("path")
-		  .data(stacked(dataContinents));
+	   	let areas = d3.select('.gv-1m-deaths-svg-' + id + ' .continent-fill-g')
+		.selectAll("path")
+		.data(stacked(dataSelected));
 
 		// enter selection
-		rects
-		  .enter().append("path")
+		areas
+		.enter()
+		.append("path")
 
 		// update selection
-
 		let fills = d3.selectAll(".gv-1m-deaths-svg-" + id + ' .continent-fill')
 
-		rects
+		areas
 		  .transition()
 		  .duration(300)
 		  .attr('d', localArea)
@@ -334,15 +346,20 @@ const makeSlot = (id, date, deaths) => {
 		})
 
 
-		rects
-		  .exit().remove();
+
+		// exit selection
+		areas
+		.exit()
+		.remove();
 
    		
    })
 
-   let filtered = dataSelected.filter(d => timeParse(d.date) <= timeParse(keyDates[id].date) )
+   console.log(id)
 
-
+   let filtered;
+   if(id > 1)filtered = dataSelected.filter(d => timeParse(d.date) <= timeParse(keyDates[id-1].date) )
+   else filtered = dataSelected.filter(d => timeParse(d.date) <= timeParse(keyDates[0].date) )
 
 
 	makeContinentChart(svg,stacked(filtered))
@@ -412,11 +429,11 @@ const update = (svg, date, counter, deaths, continents) => {
 	makeContinentChart(svg);
 
 	svg.selectAll(".y.axis")
-	.transition().duration(1000)
+	//.transition().duration(1000)
 	.call(yAxis);
 
 	svg.selectAll(".x.axis")
-	.transition().duration(1000)
+	//.transition().duration(1000)
 	.call(xAxis);
 
 	d3.select('.y.axis .domain').remove()
@@ -429,8 +446,7 @@ const makeContinentChart = (svg, data = null) => {
 	if(data != null)
 	{
 
-		let continentsFill = svg.append('g')
-		.attr('class', 'continent-fill-g')
+		let continentsFill = svg.select('.continent-fill-g')
 		.selectAll('path')
 		.data(data)
 		.enter()
@@ -446,7 +462,7 @@ const makeContinentChart = (svg, data = null) => {
 
 		svg.selectAll('.continent-fill')
 		.transition()
-		.duration(1000)
+		.duration(300)
 		.attr('d',area)
 		.on('end', (d,i) => {
 	
@@ -455,9 +471,11 @@ const makeContinentChart = (svg, data = null) => {
 
 				let id = +d3.select(svg.node()).attr('id').split('-')[4] -1;
 
+				let filtered = dataCountriesDaily.filter(d => timeParse(d.date) <= timeParse(keyDates[id].date) )
+
 				updateScales(keyDates[id].date)
 
-				//makeCountryChart(svg, dataCountriesDaily)
+				makeCountryChart(svg, filtered)
 			}
 		})
 	}
@@ -468,10 +486,9 @@ const makeCountryChart = (svg, data) => {
 		let key;
 		let tt;
 
-		svg.selectAll('.countries-buttons path').remove()
+		svg.select('.countries-buttons').selectAll('path').remove()
 
-		let countries = svg.append('g')
-		.attr('class', 'countries-buttons')
+		let countries = svg.select('.countries-buttons')
 		.selectAll('path')
 		.data(stacked(data))
 		.enter()
