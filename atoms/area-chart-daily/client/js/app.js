@@ -3,8 +3,6 @@ import * as d3Collection from 'd3-collection'
 import {TweenMax} from "gsap";
 import {numberWithCommas} from 'shared/js/util.js'
 
-console.log('appddaily')
-
 let d3 = Object.assign({}, d3B, d3Collection);
 console.log('v-11')
 const slots = d3.selectAll("div[id*='interactive-slot-']").nodes();
@@ -13,9 +11,13 @@ let isMobile = window.matchMedia('(max-width: 700px)').matches;
 
 let data = [];
 
-let dataContinents = [];
+let dataContinentsAcum = [];
+let dataContinentsDaily = [];
 
-const dataCountries = [];
+const dataCountriesAcum = [];
+const dataCountriesDaily = [];
+
+let dataSelected = dataContinentsDaily;
 
 const countriesByDate = [];
 
@@ -75,7 +77,7 @@ let xAxis = (g) => {
 
 let stacked = (data) => {
 
-	let entriesRaw = Object.entries(data[data.length-1]).slice(1).filter(d => d[1] > 0)
+	let entriesRaw = Object.entries(data[data.length-1]).slice(1)/*.filter(d => d[1] > 0)*/
 	let entries = entriesRaw.map(d => d[0])
 
 	return d3.stack()
@@ -115,15 +117,25 @@ d3.json('https://interactive.guim.co.uk/docsdata/1YyNb9oLJOIgIUZcu-FpvCnluaBm0f_
 
 	dates.map((date,i) => {
 
-		prevDate = i > 0 ? prevDate = dates[i-1] : date;
+		prevDate = i > 0 ? dates[i-1] : date;
 
 		let objCountry = {date:date};
+		let objCountryDaily = {date:date};
 
-		data.map(country => objCountry[country['Country/Region']] = +country[date] - +country[prevDate])
+		data.map(country => objCountry[country['Country/Region']] = +country[date])
+		data.map((country,j) => {
 
-		dataCountries.push(objCountry)
+			let prevDeaths = i < 1 ? 0 : +country[prevDate];
 
-		dataContinents.push({date:date})
+			objCountryDaily[country['Country/Region']] = +country[date] - prevDeaths;
+		})
+		
+
+		dataCountriesAcum.push(objCountry)
+		dataCountriesDaily.push(objCountryDaily)
+
+		dataContinentsAcum.push({date:date})
+		dataContinentsDaily.push({date:date})
 
 		countriesByDate[date] = objCountry;
 
@@ -131,16 +143,23 @@ d3.json('https://interactive.guim.co.uk/docsdata/1YyNb9oLJOIgIUZcu-FpvCnluaBm0f_
 
 			let con = rawData.filter(f => f.Continent === continent);
 
-			let sum = d3.sum(con, s => s[date] );
+			let sumAcum = d3.sum(con, s => s[date]);
+			let sumDaily = d3.sum(con, s => {
 
-			let filtered = dataContinents.filter(d => d.date === date)[0];
+				let prevDeaths = i < 1 ? 0 : +s[prevDate];
 
-			filtered[con[0].Continent.replace(/\s/g, '-')] = sum
+				return s[date] - prevDeaths
+			});
+
+			let filteredAcum = dataContinentsAcum.filter(d => d.date === date)[0];
+			let filteredDaily = dataContinentsDaily.filter(d => d.date === date)[0];
+
+			filteredAcum[con[0].Continent.replace(/\s/g, '-')] = sumAcum;
+			filteredDaily[con[0].Continent.replace(/\s/g, '-')] = sumDaily;
 
 		})
 
 	})
-
 
 	response.sheets.Graphic_KeyDates.map((keydate,i) => {
 
@@ -208,43 +227,144 @@ const makeSlot = (id, date, deaths) => {
 	d3.select('.y.axis .domain').remove()
 	d3.selectAll('.x.axis .domain').remove()
 
+	let slider = `<div class="no2-slider s-${id}">
+           			 <div class="no2-slider__inner"></div>
+        		</div>`
 
-	let index = keyDates.findIndex(d => d.date === date)
+   counter.append('div').html(slider)
 
-	let data;
-	if(id > 1)data= dataContinents.filter(d => timeParse(d.date) <= timeParse(keyDates[index+1].date));
-	else data = dataContinents.filter(d => timeParse(d.date) <= timeParse(keyDates[0].date));
+   d3.select(`.s-${id} .no2-slider__inner`)
+   .on('click', (event,i) => {
 
+   		let selected = d3.select(event.target).attr('class').indexOf('no2-right') == -1 ? true : false;
 
-	makeContinentChart(svg,stacked(data))
+   		let dataContinents = selected == true ? dataContinentsAcum : dataContinentsDaily;
+   		let dataCountriesSelected = selected == true ? dataCountriesAcum : dataCountriesDaily;
 
-	updateScales(date, deaths)
+   		dataSelected = dataContinents;
 
+	   	d3.select(event.target)
+	   	.classed('no2-right', selected);
 
-	//FOR PRINT
-/*
-	keyDates.map(date => {
+	   	let all = dataSelected.filter(d => timeParse(d.date) <= timeParse(keyDates[id-1].date));
 
-					console.log(date.date, xScale(timeParse(date.date)))
-					svg.append('path')
-					.attr('d', `M ${xScale(timeParse(date.date))} 0 v ${height}` )
-					.attr('stroke', 'red')
-					.attr('date-dummy')
-				})*/
+		let max = d3.max(all.map(d => d3.sum(Object.values(d))));
+
+		let localYScale = d3.scaleLinear()
+		.range([height - margin.bottom, margin.top])
+
+		let localXScale = d3.scaleTime()
+		.range([0, width + margin.right])
+		.domain([iniDate, timeParse(keyDates[id-1].date)]);
+
+		selected == true ?
+	   	localYScale
+	   	.domain([0,keyDates[id-1].deaths])
+	   	:
+	   	localYScale
+	   	.domain([0,max]);
+
+	   	let localArea = d3.area()
+		.x(d => localXScale(timeParse(d.data.date)))
+		.y0(d => localYScale(d[0]))
+		.y1(d => localYScale(d[1]))
+
+		let localYAxis = (g) => {
+			return g
+			.attr("class", 'y axis')
+			.call(d3.axisLeft(localYScale)
+					.tickFormat(d => numberWithCommas(d))
+					.tickSizeInner(-width)
+					.ticks(3)
+			)
+			.selectAll("text")
+			.style("text-anchor", "start")
+			.attr('x', 0)
+			.attr('y', -10);
+		}
+
+		d3.selectAll(".gv-1m-deaths-svg-" + id + " .y.axis")
+		.transition().duration(1000)
+		.call(localYAxis);
+
+		d3.select('.y.axis .domain').remove()
+
+	   	var rects = d3.select('.gv-1m-deaths-svg-' + id + ' .continent-fill-g')
+		  .selectAll("path")
+		  .data(stacked(dataContinents));
+
+		// enter selection
+		rects
+		  .enter().append("path")
+
+		// update selection
+
+		let fills = d3.selectAll(".gv-1m-deaths-svg-" + id + ' .continent-fill')
+
+		rects
+		  .transition()
+		  .duration(300)
+		  .attr('d', localArea)
+		  .on('end', (d,i) => {
+
 	
-	
+			if(i==fills.nodes().length-1)
+			{
+
+				let id = +d3.select(svg.node()).attr('id').split('-')[4] -1;
+
+				let all = dataSelected.filter(d => timeParse(d.date) <= timeParse(keyDates[id].date));
+
+				let max2 = d3.max(all.map(d => d3.sum(Object.values(d))));
+
+
+				selected == true ?
+			   	yScale
+			   	.domain([0,keyDates[id].deaths])
+			   	:
+			   	yScale
+			   	.domain([0,max2]);
+
+
+				xScale.domain(localXScale.domain())
+				yScale.domain(localYScale.domain())
+
+				makeCountryChart(d3.select(".gv-1m-deaths-svg-" + (id + 1)), dataCountriesSelected)
+			}
+		})
+
+
+		rects
+		  .exit().remove();
+
+   		
+   })
+
+   let filtered = dataSelected.filter(d => timeParse(d.date) <= timeParse(keyDates[id].date) )
+
+
+
+
+	makeContinentChart(svg,stacked(filtered))
+
+	updateScales(date)
+
 }
 
-const updateScales = (date, deaths) => {
+const updateScales = (date) => {
 
-	yScale.domain([0,deaths]);
+	let all = dataContinentsDaily.filter(d => timeParse(d.date) <= timeParse(date));
+
+	let max = d3.max(all.map(d => d3.sum(Object.values(d))));
+
+	yScale.domain([0,max]);
 	
 	xScale.domain([iniDate,timeParse(date)])
 }
 
 const update = (svg, date, counter, deaths, continents) => {
 
-	updateScales(date, deaths)
+	updateScales(date)
 
 	counter.select('.counter-date')
 	.html(beautyDate(date))
@@ -322,32 +442,22 @@ const makeContinentChart = (svg, data = null) => {
 	else
 	{
 
+		let fills = svg.selectAll('.continent-fill')
+
 		svg.selectAll('.continent-fill')
 		.transition()
 		.duration(1000)
 		.attr('d',area)
 		.on('end', (d,i) => {
-
-			if(d.length == 7){
-
-				let data = dataCountries.filter(d => timeParse(d.date) <= timeParse(keyDates[0].date))
-
-				makeCountryChart(svg,stacked(data))
-
-			}
-
-			
-			if(i==5)
+	
+			if(i==fills.nodes().length-1)
 			{
 
-				let date = d[d.length-1].data.date;
-				let deaths = d[d.length-1][1];
+				let id = +d3.select(svg.node()).attr('id').split('-')[4] -1;
 
-				updateScales(date, deaths)
+				updateScales(keyDates[id].date)
 
-				let data = dataCountries.filter(d => timeParse(d.date) <= timeParse(date))
-
-				makeCountryChart(svg,stacked(data))
+				//makeCountryChart(svg, dataCountriesDaily)
 			}
 		})
 	}
@@ -358,9 +468,12 @@ const makeCountryChart = (svg, data) => {
 		let key;
 		let tt;
 
+		svg.selectAll('.countries-buttons path').remove()
+
 		let countries = svg.append('g')
+		.attr('class', 'countries-buttons')
 		.selectAll('path')
-		.data(data)
+		.data(stacked(data))
 		.enter()
 		.append('path')
 		.attr('class', d => 'country-fill ' + d.key.replace(/\s/g, '-'))
@@ -408,6 +521,34 @@ const makeCountryChart = (svg, data) => {
 
 			manageHovering(tt,key,d.key, countryData, enviroment)
 		})
+		.on('mousemove', event => {
+
+			let id = event.target.parentNode.parentNode.parentNode.id;
+
+			tt = d3.selectAll('#' + id + ' .tooltip')
+
+			let here = d3.pointer(event);
+
+		    let left = here[0];
+		    let top = here[1];
+
+		    let bRect = tt.node().getBoundingClientRect();
+
+			let tWidth = bRect.width;
+			let tHeight = bRect.height;
+
+		    let posX = left - tWidth - 6;
+		    let posY = top - tHeight - 6;
+
+		    if(posX + tWidth > width)posX = width - tWidth - 2
+
+		    tt.style('left',  posX + 'px')
+			tt.style('top', posY + 'px')
+		})
+
+		
+
+		
 }
 
 const manageHovering = (tt,key,countryName, countryData, enviroment) => {
@@ -463,13 +604,15 @@ window.onscroll = (ev) => {
 
 		    		if(s.getBoundingClientRect().top <= (window.innerHeight / 2) + 100) {
 
-		    			let continents = dataContinents.filter(c => c.date === keyDates[i].date);
+		    			let continents = dataContinentsAcum.filter(c => c.date === keyDates[i].date);
 
-		    			let data = dataContinents.find(f => f.date === keyDates[i].date);
+		    			let data = dataContinentsDaily.find(f => f.date === keyDates[i].date);
 
 		    			let deaths = d3.sum(Object.values(data))
 
-		    			update(d3.select('.gv-1m-deaths-svg-' + (i+1)), keyDates[i].date, d3.select('.counter' + (i+1)), deaths, continents);
+		    			updateScales(keyDates[i].date)
+
+		    			update(d3.select('.gv-1m-deaths-svg-' + (i+1)), keyDates[i].date, d3.select('.counter' + (i+1)), 10000, continents);
 
 		    			svgUsed.push(i)
 

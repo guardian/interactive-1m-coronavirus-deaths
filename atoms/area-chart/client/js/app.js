@@ -152,6 +152,8 @@ d3.json('https://interactive.guim.co.uk/docsdata/1YyNb9oLJOIgIUZcu-FpvCnluaBm0f_
 
 		makeSlot(i+1, keyDates[index].date, keyDates[index].deaths)
 	})
+
+
 })
 
 const makeSlot = (id, date, deaths) => {
@@ -272,7 +274,7 @@ const update = (svg, date, counter, deaths, continents) => {
 	
 	let deathsOld = parseInt(counter.node().innerHTML);
 
-	var Cont={val:deathsOld} , NewVal = keyDates.find(d => d.date === date).deaths ;
+	var Cont={val:deathsOld} , NewVal = deaths ;
 
 	let animation = TweenMax.to(Cont, 1, {
 		  var: NewVal,
@@ -336,6 +338,8 @@ const makeContinentChart = (svg, data = null) => {
 
 				let date = d[d.length-1].data.date;
 				let deaths = d[d.length-1][1];
+
+				console.log(deaths)
 
 				updateScales(date, deaths)
 
@@ -459,11 +463,7 @@ window.onscroll = (ev) => {
 
 		    			let continents = dataContinents.filter(c => c.date === keyDates[i].date);
 
-		    			let data = dataContinents.find(f => f.date === keyDates[i].date);
-
-		    			let deaths = d3.sum(Object.values(data))
-
-		    			update(d3.select('.gv-1m-deaths-svg-' + (i+1)), keyDates[i].date, d3.select('.counter' + (i+1)), deaths, continents);
+		    			update(d3.select('.gv-1m-deaths-svg-' + (i+1)), keyDates[i].date, d3.select('.counter' + (i+1)), keyDates[i].deaths, continents);
 
 		    			svgUsed.push(i)
 
